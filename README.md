@@ -4,9 +4,18 @@
 
 This guide is intended to give Arch Linux users who are new to the idea of meta-packages and self-hosted respositories (repos) the basics of maintaining their own packages and repos. This topic is immensely useful for anyone that has more than one computer and would like to sync package changes (not configuration changes) across them. The information is wholly available in the Arch wiki, but does not currently exist compiled in a single page. A full bibliography of Arch Wiki articles that contain pertinent information or that are referenced in the guide will be listed below as well as linked throughout the document as they are referenced.
 
+### Table of Contents
+-[Basics](#basics)
+  -[Q1. What is a package?](##q1-what-is-a-package)
+  -[Q2. What is a PKGBUILD?](#q2-what-is-a-pkgbuild)
+  -[Q3. What is the Arch Build System?](#q3-what-is-the-arch-build-system)
+  -[Q4. What is a dependency? Also, what does it mean to say a package is installed 'explicitely'?(#q4-what-is-a-dependency-also-what-does-it-mean-to-say-a-package-is-installed-explicitely)
+  -[Q5. What is a meta-package](#q5-what-is-a-meta-package)
+  -[Q6. What is a group?](#q6-what-is-a-group)
+ 
 ## Basics
 
-### Q1. What is a package.
+### Q1. What is a package?
 
 A package is a single compressed archive that contains all the information and files neccessary for the Arch Linux **pac**age **man**ager to install a specific application. For example, the package for the default shell `bash` is a compressed archive containing all the information about `bash` as well as the `bash` executable, a host of configuration files and the manual pages. The idea is that any computer containing all the pre-requisites for a given application (dependencies, architecture, pacman, etc) could, with only the package compressed archive, install the complete application. This is true for a small, simple application with one executible file and no additional config files or data as well as for a complex application with hundreds of files like Visual Studio Code.
 
