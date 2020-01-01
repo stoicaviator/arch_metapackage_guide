@@ -8,13 +8,16 @@ This guide has 6 main parts. Basics, Repositories, Meta-packages, Recommendation
 While this may seem complicated and like it's a lot of information, building your own meta-packages and hosting your own repository is actually very simple at its heart thanks to how Arch Linux works. Many people who struggle with installing Arch Linux are reminded that it's designed to be "user-centric, not user-friendly" and aims to simplify development, not be easy to use. Once you understand how to create your own packages and host your own repositories, you'll learn very quickly just how true those statements are.
 I hope you find this guide useful and the experience of creating your own packages and hosting your own repositories to be rewarding.
 
+## A note on conventions
+I've tried to be as generic as possible, but in the name of accuracy and to ease testing, some of the examples are very specific, especially when it comes to naming. I am making an assumption that the user has some basic understanding of the linux filesystem and basic linux operations. I also initially tried to explain when there were many options available, but eventually gave up. So as a general disclaimer, be aware that some things need not be exactly as specified by me here. For example, I talk about package files and database files as being tar files, optionally compressed. I personally do use compression and it's usually configured by default. However, the type of compression may differ. Where I have the `.gz` extension, you may have `.xz` or some other compression extension. In general these are interchangeable. If I find a situation where it isn't, I will specify. This may apply to other things as well.
+
 ### Table of Contents
 - [Basics](#basics)
   - [Q1. What is a package?](#q1-what-is-a-package)
   - [Q2. What is a PKGBUILD?](#q2-what-is-a-pkgbuild)
   - [Q3. What is the Arch Build System?](#q3-what-is-the-arch-build-system)
   - [Q4. What is a dependency? Also, what does it mean to say a package is installed 'explicitely'?](#q4-what-is-a-dependency-also-what-does-it-mean-to-say-a-package-is-installed-explicitely)
-  - [Q5. What is a meta-package](#q5-what-is-a-meta-package)
+  - [Q5. What is a meta-package?](#q5-what-is-a-meta-package)
   - [Q6. What is a group?](#q6-what-is-a-group)
   - [Q7. What is a repository exactly?](#q7-what-is-a-repository-exactly)
   - [Q8. What is the AUR? How do AUR helpers work?](#q8-what-is-the-aur-how-do-aur-helpers-work)
@@ -58,7 +61,7 @@ When pacman installs a package, it stores some simple information about it in it
 
 The reason to differentiate between explicit or as a dependency is because dependencies change. Imagine package `foo` depends on package `bar`. But a few years down the road something much better than `bar` comes out called `baz`, and `foo` stops needing `bar` but needs `baz` instead... we would now call `bar` an orphan - it was installed as a dependency to a package that no longer depends on it. Unless someone has made an error someone, orphas can be safely removed from your system, and many Arch users check for orphans on a regular basis.
 
-### Q5. What is a meta-package
+### Q5. What is a meta-package?
 A meta-package is a term for a specific type of package that actually contains no applications or files itself, but rather serves as an umbrella that emcompasses a number of packages underneath it. In essence, a meta-package is a package that is completely empty except that it depends on other packages. This simplifies the installation (or removal) of multiple packages by installing them all automatically when the meta-package is installed. It also serves to make the list of explicitely installed packages smaller. For example, if we had a metapackage called `foobarbaz` consisting of the packages `foo`, `bar` and `baz`, we could install them all simply with `pacman -S foobarbaz`. If we output a list of explicitely installed packages, we would see `foobarbaz` in the list, but not `foo`, `bar`, or `baz`. We could see them all if we output a list of all installed packages, or packages installed as a dependency. We could also uninstall them all with `pacman -R foobarbaz`.
 
 There is an important distinction here. Remember I said a package was a single compressed archive that contains all the information and files necessary for pacman to install a specific application? In this case, we have no files. The package `foobarbaz` **does not contain** the files for `foo`, `bar` or `baz`, only that they are dependencies. So if you took your `foobarbaz` package file to a computer with no internet access and tried to install it, pacman would complain about missing dependencies `foo`, `bar` and `baz` unless you had already installed them before. The `foobarbaz` package tells pacman it needs `foo`, `bar` and `baz`, but it does not contain their files.
