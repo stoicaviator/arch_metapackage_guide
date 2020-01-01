@@ -16,10 +16,18 @@ I hope you find this guide useful and the experience of creating your own packag
   - [Q6. What is a group?](#q6-what-is-a-group)
   - [Q7. What is a repository exactly?](#q7-what-is-a-repository-exactly)
   - [Q8. What is the AUR? How do AUR helpers work?](#q8-what-is-the-aur-how-do-aur-helpers-work)
+  - [Q9. What do you mean by "local repo" and "hosted repo"?]
 - [Repositories](#repositories)
   - [Pacman and Repos](#pacman-and-repos)
   - [SigLevel and Package Signing](#siglevel-and-package-signing)
   - [Custom Local Repos](#custom-local-repos)
+    - [Local Repo Creation](#local-repo-creation)
+    - [Local Repo Configuration](#local-repo-configuration)
+    - [Local Repo Usage](#local-repo-usage)
+  - [Custom Hosted Repos](#custom-hosted-repos)
+    - [Hosted Repo Creation](#hosted-repo-creation)
+    - [Hosted Repo Configuration](#hosted-repo-configuration)
+    - [Hosted Repo Usage](#hosted-repo-usage)
 - [Meta-Packages](#meta-packages)
 - [Recommendations](#recommendations)
 - [Conclusions](#conclusions)
@@ -56,6 +64,9 @@ A repository is, in essence a directory containing a database file which lists a
 ### Q8. What is the AUR? How do AUR helpers work?
 The Arch User Repository (AUR) is not really a repository as we've discussed them. As we've already covered, a repository is a directory containing a database and a bunch of packages, and packages are self-contained compressed archives containing all the information and files required to install a particular package. The AUR does have a database, but that database is not the same as the repository databases we'll be dealing with. It also doesn't contain packages, it contains what are referred to as "snapshots". These snapshots contain the source files required by the ABS to build packages. While commonly referred to as "AUR packages", they are in fact not packages until after you download the snapshot and turn them into a package using the ABS. Even if you use an AUR helper now, such as `yay`, your first install required you to make `yay` yourself by downloading the snapshot from the AUR and using the ABS to create a `yay` package, which you then installed with pacman. We will be covering how to do this a bit later if you have forgotten how.
 
+### Q9. What do you mean by "local repo" and "hosted repo"?
+In theory, what I call a "hosted repo" is incorrect. I don't mean we want to have our repo hosted on AWS or anything that conplex, I simply use the term "local repo" to mean "installed on the local computer" and "hosted repo" to mean "installed on one of our computers on the network and hosted via a lightweight web server." It's a convention I only devised for use in this guide to differentiate the two types of repos I wanted to cover. While I will be using a webserver in my examples, it is worth noting that this isn't the only way. You could use FTP, Samba, NFS or something else to share your repo over your network, but I find lighttpd is such an easy webserver to set up and use that I decided to use it in my examples. So just bear in mind these terms aren't official or universal, and are conventions just for this guide.
+
 ## Repositories
 
 ### Pacman and Repos
@@ -76,11 +87,18 @@ So for our `core` repo, if you went to one of your mirrors, you'd see that at th
 Package signing is crucial to ensuring the integrity of core packages. Without package signing, there would be no way to know that the packages created by the Arch devs that we are installing haven't been tampered with. As a result, the security of any Arch Linux system would be called into question. When packages are created by the Dev team, they include a `.sig` file that contains the cryptographic proof that it was indeed built by who it says it was, and that the package file itself has not been tampered with. This package signing is a requirement of the development team, but it's an optional setting in pacman. By default, all packages installed by pacman **require** that they have been signed. The package database, however, does not currently require this by default and the official repo databases are not signed at this time anyway (it's a work in progress, to be rolled out eventually).
 To confirm pacman is indeed using the default package signing settings, check your `/etc/pacman.conf` file again, looking in the `[options]` section we spoke about for the setting called `SigLevel`. There are 3 options: Never, Optional, and Required. Never means packages are never checked to make sure they are signed and that the signature data indicates they are authenticate and haven't been tampered with, even if the data is available. Optional means check it when data is available, but if packages aren't signed just go ahead and assume they are fine. And Required means check all packages and only install those that are signed and whose signatures are valid. 
 Each option can also be specified to apply only to Package or Database. For example, PackageRequired DatabaseNever would mean you want all packages you install to be checked, but don't check databases even if signing information is available. Your default SigLevel setting should be `Required DatabaseOptional`, which is saying "I want signature checking to be required globally for everything, but for databases specifically, it's optional." Currently, since there are only 2 options, this would be the same as `PackageRequired DatabaseOptional` but takes less space.
-There is one other setting that can go in SigLevel, and that is to what degree you want signatures checked. One option, the default option which is why it's never specified, is to only accept signatures that have been trusted by the Arch Dev team. The other option, is to accept any signature, which is 
+There is one other setting that can go in SigLevel, and that is to what degree you want signatures checked. One option, the default option which is why it's never specified, is `TrustedOnly` which will only accept signatures that have been trusted by the Arch Dev team or specifically by you. The other option, `TrustAll` will accept any signature, which is a very bad idea. You absolutely should never set the official repos to `TrustAll`, and I would suggest you'd be better off just not verifying package signing than to `TrustAll`. Officially, the `TrustAll` option is for debugging.
 
 ### Custom Local Repos
-We know know everything we need to know about making our own repos. We know we need a directory for our repo, we know we need a database in an arhive format (`.db.tar` and optionally compressed) stored in that directory, and we know we need our package files stored there as well. We also know we need to define a new repo in `pacman.conf` by putting it in square brackets and then pass our settings in the lines after it, which at a minimum must be a path to our repo.
-The only thing we didn't really discuss was the settings. For most users, we only need some basic settings. Specifically, the 
+We now know everything we need to know about making our own repos. We know we need a directory for our repo, we know we need a database in an arhive format (`.db.tar` and optionally compressed) stored in that directory, and we know we need our package files stored there as well. We also know we need to define a new repo in `pacman.conf` by putting it in square brackets and then pass our settings in the lines after it, which at a minimum must be a path to our repo. For the purposes of this guide, we will not be using database or package signing on our custom repos. There are references in the bibliography that you can read if you'd like to set them up.
+
+#### Local Repo Creation
+#### Local Repo Configuration
+#### Local Repo Usage
+### Custom Hosted Repos
+#### Hosted Repo Creation
+#### Hosted Repo Configuration
+#### Hosted Repo Usage
 
 ## Meta-Packages
 ## Recommendations
