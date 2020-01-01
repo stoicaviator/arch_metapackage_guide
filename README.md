@@ -9,7 +9,7 @@ This guide is intended to give Arch Linux users who are new to the idea of meta-
   - [Q1. What is a package?](##q1-what-is-a-package)
   - [Q2. What is a PKGBUILD?](#q2-what-is-a-pkgbuild)
   - [Q3. What is the Arch Build System?](#q3-what-is-the-arch-build-system)
-  - [Q4. What is a dependency? Also, what does it mean to say a package is installed 'explicitely'?(#q4-what-is-a-dependency-also-what-does-it-mean-to-say-a-package-is-installed-explicitely)
+  - [Q4. What is a dependency? Also, what does it mean to say a package is installed 'explicitely'?](#q4-what-is-a-dependency-also-what-does-it-mean-to-say-a-package-is-installed-explicitely)
   - [Q5. What is a meta-package](#q5-what-is-a-meta-package)
   - [Q6. What is a group?](#q6-what-is-a-group)
  
