@@ -2,7 +2,13 @@
 
 ## Introduction
 
-This guide is intended to give Arch Linux users who are new to the idea of meta-packages and self-hosted respositories (repos) the basics of maintaining their own packages and repos. This topic is immensely useful for anyone that has more than one computer and would like to sync package changes (not configuration changes) across them. The information is wholly available in the Arch wiki, but does not currently exist compiled in a single page. A full bibliography of Arch Wiki articles that contain pertinent information or that are referenced in the guide will be listed below as well as linked throughout the document as they are referenced.
+This guide is intended to give Arch Linux users who are new to the idea of meta-packages and self-hosted respositories (repos) the basics of maintaining their own packages and repos. This topic is immensely useful for anyone that has more than one computer and would like to sync package changes (not configuration changes) across them. The information is wholly available in the Arch wiki, but does not currently exist compiled in a single page. As I'm familiar with github formatting, the information was easier for me to compile here. It is my intention to port some (or all) of this over to the Arch Wiki.
+
+This guide has 6 main parts. Basics, Repositories, Meta-packages, Recommendations, Conclusions and Bibliography. Basics is laid out in an FAQ style ensuring a fundamental understanding of the components we are going to be working with. Repositories will talk about how to create two types of self-hosted repositories: as a directory on your local machine, as well as a simple repository hosted over your network using a simple webserver. Meta-packages descibes how to create simple meta-packages starting with a PKGBUILD template and ending with adding them to a self-hosted repository. Recommendations contains a few tips and tricks that I have found work best for me in maintaining my own self-hosted repositories with my own packages and meta-packages. Conclusions is just some closing remarks. Bibliography will link to all the information I sourced to compile this document.
+
+While this may seem complicated and like it's a lot of information, building your own meta-packages and hosting your own repository is actually very simple at its heart thanks to how Arch Linux works. Many people who struggle with installing Arch Linux are reminded that it's designed to be "user-centric, not user-friendly" and aims to simplify development, not be easy to use. Once you understand how to create your own packages and host your own repositories, you'll learn very quickly just how true those statements are.
+
+I hope you find this guide useful and the experience of creating your own packages and hosting your own repositories to be rewarding.
 
 ### Table of Contents
 - [Basics](#basics)
@@ -12,6 +18,8 @@ This guide is intended to give Arch Linux users who are new to the idea of meta-
   - [Q4. What is a dependency? Also, what does it mean to say a package is installed 'explicitely'?](#q4-what-is-a-dependency-also-what-does-it-mean-to-say-a-package-is-installed-explicitely)
   - [Q5. What is a meta-package](#q5-what-is-a-meta-package)
   - [Q6. What is a group?](#q6-what-is-a-group)
+  - [Q7. What is a repository exactly?]
+  - [Q8. What is the AUR? How do AUR helpers work?]
  
 ## Basics
 
@@ -51,3 +59,12 @@ Some users have complained about this. But if you think about it for a second, i
 
 A package group is like a meta-package, except that all members of the group are installed explicitely. Remember a meta-package only has dependencies, and while the meta-package and its dependencies all get installed by pacman, all the meta-package is installed explicitely. With a group, you don't end up with a package named after the group installed explicitely and a bunch of installed dependencies, you end up with all members of the group installed explicitely.
 
+### Q7. What is a repository exactly?
+
+A repository is, in essence a directory containing a database file which lists all the packages stored in their repository and their latest version, as well as the package files themselves. That's really all there is to it. There is no mystery to a repository and they are not difficult to create or host.
+
+### Q8. What is the AUR? How do AUR helpers work?
+
+The Arch User Repository (AUR) is not really a repository in the strictest sense. As we've already covered, a repository is a directory containing a database and a bunch of packages, and packages are self-contained compressed archives containing all the information and files required to install a particular package. The AUR does have a database, but that database is not the same as the repository databases we'll be dealing with. It also doesn't contain packages, it contains what are referred to as "snapshots". These snapshots contain the source files required by the ABS to build packages. While commonly referred to as "AUR packages", they are in fact not packages until after you download the snapshot and turn them into a package using the ABS. Even if you use an AUR helper now, such as `yay`, your first install required you to make `yay` yourself by downloading the snapshot from the AUR and using the ABS to create a `yay` package, which you then installed with pacman. We will be covering how to do this a bit later if you have forgotten how.
+
+## Meta-packages 
