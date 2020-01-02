@@ -36,13 +36,22 @@ I've tried to be as generic as possible, but in the name of accuracy and to ease
     - [Hosted Repo Configuration](#hosted-repo-configuration)
     - [Hosted Repo Usage](#hosted-repo-usage)
 - [Meta-Packages](#meta-packages)
+  - [Meta-Package Template]
+  - [Create a Custom Install Meta-Package]
+  - [Use our Custom Meta-Package]
+  - [Modify our Custom Meta-Package]
+  - [Integrate AUR into our Custom Meta-Package]
 - [Recommendations](#recommendations)
+  - [Use Aurutils]
+  - [Host AUR Packages]
+  - [Use Git]
+  - [Consider Security]
 - [Conclusions](#conclusions)
 - [Bibliography](#bibliography)
  
 ## Basics
 ### Q1. What is a package?
-A package is a single compressed archive that contains all the information and files neccessary for the Arch Linux **pac**kage **man**ager (pacman) to install a specific application. For example, the package for the default shell `bash` is a compressed archive containing all the information about `bash` as well as the `bash` executable, a host of configuration files and the manual pages. The idea is that any computer containing all the pre-requisites for a given application (dependencies, architecture, pacman, etc) could, with only the package compressed archive, install the complete application. This is true for a small, simple application with one executible file and no additional config files or data as well as for a complex application with a bunch of files like LibreOffice.
+A package is a single compressed archive that contains all the information and files neccessary for the Arch Linux **pac**kage **man**ager (pacman) to install a **single**, specific application. For example, the package for the default shell `bash` is a compressed archive containing all the information about `bash` as well as the `bash` executable, a host of configuration files and the manual pages. The idea is that any computer containing all the pre-requisites for a given application (dependencies, architecture, pacman, etc) could, with only the package compressed archive, install the complete application. This is true for a small, simple application with one executible file and no additional config files or data as well as for a complex application with a bunch of files like LibreOffice.
 
 You can identify package files easily because they have the `pkg.tar` extension (often compressed, adding a compression extension onto the end of that, for example `pkg.tar.gz`). Its important to note that all packages in Arch Linux are binary packages, meaning no source is downloaded or compiled when you install a package. For those who are just learning, you may think this statement is incorrect because you've installed packages that used git source, but if you read on you will see where that confusion comes from. All the files hosted on the official Arch Linux repos (core, community, etc) are packages.
 
@@ -118,7 +127,7 @@ Luckily for me, or perhaps it's good planning, all of the dependencies for `auru
 # Build the package, syncing dependencies
 % makepkg -s
 ```
-We should now have a built package for aurutils. You'll recognize it because it will take the format of `aurutils-x.x.x-y.pkg.tar.gz`, where x.x.x is the version number (`pkgver` from the PKGBUILD) and y is the release number (`pkgrel` from the PKGBUILD). If we wanted to install it we could use `pacman -U aurutils-*.pkg.tar.gz` or `makepkg -i` (which just calls the previous pacman command). Alternatively, you can build your package using `makepkg -si` and it will sync dependencies (essentially `pacman -S --asdeps ${depends[@]}` where ${depends[@]} is the `depends` array from the PKGBUILD), and then install the package. As you are noticing, pacman is still doing all the heavy lifting. In any case, I'm not going to install `aurutils` yet, but it's ready for future examples. So let's move on.
+We should now have a built package for aurutils. You'll recognize it because it will take the format of `aurutils-x.x.x-y.pkg.tar.gz`, where x.x.x is the version number (`pkgver` from the PKGBUILD) and y is the release number (`pkgrel` from the PKGBUILD). If we wanted to install it we could use `pacman -U aurutils-*.pkg.tar.gz` or `makepkg -i` (which just calls the previous pacman command). Alternatively, you can build your package using `makepkg -si` and it will sync dependencies (essentially `pacman -S --asdeps ${depends[@]}` where ${depends[@]} is the `depends` array from the PKGBUILD), and then install the package. As you are noticing, pacman is still doing all the heavy lifting.
 
 ### Pacman and Repos
 We know what a repo is, so now let's look at how they are used by pacman. Information on repos are stored in the file `/etc/pacman.conf`. Anytime you see something in square brackets, you're seeing a repo configuration block (with one exception being the specially defined `[options]` block that must exist and which defines global settings for pacman). For example:
@@ -196,7 +205,7 @@ As previously mentioned, there are a lot of ways to serve your repo across your 
 Doesn't get any easier than that. Even file-sharing would take longer to configure. To check it's working, I create a simple page with `echo stoicaviator > /srv/http/index.html` and then fire up a browser and go to `127.0.0.1` and am greated by "stoicaviator". I usually make sure I can access that page from other computers on my network using either the computer name or ip address. I personally have a DNS server, and I've set it up so that `http://repo.stoicaviator.com` points here. You can always just stick something in your hosts file to make this work, but this is basic networking so I'll leave that to you to figure out. In any case, once you are able to access your newly-minted `index.html` from your network, we can move on to making this work with a repo.
 
 #### Hosted Repo Creation
-Much like how we created our local repo, we need to start by creating a directory. In this case though, I'm going to put the directory under the webroot, more specifically at `/srv/http/stoicaviator` and I'm going to name my repo `stoicaviator`. Now is where thins get a little complicated because permissions become a bit of an issue. The problem here is that we want our user to be able to add things to the repo, but we also want the webserver to be able to access the databse and the package files in the repo to serve them out. I find this works best by making my user the owner of the directory and files, with the webserver having group ownership and read permissions. I also use the setgid bit though it isn't 100% flawless. We'll work around it later.
+Much like how we created our local repo, we need to start by creating a directory. In this case though, I'm going to put the directory under the webroot, more specifically at `/srv/http/stoicaviator` and I'm going to name my repo `stoicaviator`. Now is where thins get a little complicated because permissions become a bit of an issue. The problem here is that we want our user to be able to add things to the repo, but we also want the webserver to be able to access the databse and the package files in the repo to serve them out. I find this works best by making my user the owner of the directory and files, with the webserver having group ownership and read permissions. I also use the setgid bit so the group is always set automatically.
 ```bash
 % sudo install -dm2750 /srv/http/stoicaviator -o $USER -g http
 % repo-add /srv/http/stoicaviator/stoicaviator.db.tar
@@ -231,8 +240,195 @@ With all this configured, I no longer use an AUR helper on my client machines. W
 With a hosted repo under our belt, we have just made meta-packages the logical next step. Now we can combine official and AUR packages into one big meta-package to easily duplicate our installed packages on new computers or fresh reinstalls, and they all work seamlessly thanks to our hosted repo.
 
 ## Meta-Packages
+As we've already discussed, a meta-package is a package that contains no applications or files itself, but simply links multiple other packages together via dependencies. It's a way to install a set of applications all together and administerd by a single package. 
+
+Let's look at, for example, `plamsa-meta`, which pulls in a minimum set of packages for a functioning KDE plasma environment. While it installs nothing itself, it has 28 dependencies, meaning in order to replicate what `plasma-meta` does, you'd have to install 28 other packages individually. That makes for a pretty long command to have to type in. Obviously remembering this big list is nearly impossible, so you'd probably create a text file of packages and pipe that to pacman instead, but now you have a file you have to remember to copy over to new installs to use. Not only that, but now if you ever go through your list of explicitely installed packages looking to slim down your system, or looking for something specific, you've got 28 packages in the place of one. A meta-package streamlines all this.
+
+It's worth noting as well that a meta-package can pull in any package your pacman knows about. On a fresh, default install, that means your meta-package can only contain packages from the official repos. But with a hosted repo, like we've set up, all you need to do is ensure that `/etc/pacman.conf` is set up with our hosted repo and we have access to any package we've also put in there - which may be packages from the AUR, or even packages we've created ourselves, including meta-packages. That last point, "including meta-packages", is actually a huge advantage. Imagine we create a PKGBUILD for a package called `stoicaviator-meta`, and we have it set up to pull in a set of applications we regularly use and want installed on all of our systems, we can build `stoicaviator-meta` using ABS and stick it on our hosted repo, and now we can even use it to install a base system. Let's take a loot at how that would work.
+
+### Meta-Package Template
+The only file you need for a meta-package is a PKGBUILD file, of which only a basic amount of information is required. Here is the template I personally use for a meta-package:
+```
+# Maintainer: Stoic Aviatior <stoicaviator[at]gmail.com>
+pkgname=
+pkgver=
+pkgrel=
+pkgdesc=
+url='https://github.com/stoicaviator'
+arch=('any')
+license=('GPL')
+depends=()
+```
+As you can see, it's very simple. We only need to fill in 5 lines to create a meta-package. Let's take a look at those fields we need to complete.
+
+`pkgname` is a simple name that the final package will be called - this would be what you pass to pacman to install it.
+
+`pkgver` is almost always just a number, usually in decimal notation, indicating the version, though it can contain text as well. I'll just recommend you don't use anything other than numbers and decimals here, as doing so requires you write an additional function letting pacman know when a package has an update - is `myversion` newer than `anotherversion`? I start with 1 usually, some people start with 0.0.1, other with 1.0.0. It's up to you. We'll see an example shortly. This is one of the two ways that pacman (or an AUR helper in the case of package snapshots on the AUR) will know an application has been updated. A bigger number means a newer package, so always increment this when you make a change. Going from, for example, 2.3 to 1.1 will not cause an update. But going from 1.0.0 to 1.0.1 or from 2 to 3.1 will. In general the bigger the jump, the more significant the change. I tend to stick with integers and use this field to indicate only major changes. So small changes I indicate  with `pkgrel`, which we look at next, but a major change would cause me to bump my `pkgver`.
+
+`pkgrel` is the release of the package. In the case of official packages, this usually implies a correction. For example, if we were an Arch Maintainer and we made a package for the Linux Kernel, we wouldn't want to change the version to fix an error with our package or because we adjusted an Arch-specific patch, because then there would be confusion about which upstream kernel we are referring to. If we had a package to install the Linux Kernel, version 5.4.1, but wanted to change a config option and changed our `pkgver` to 5.4.2, what would we do when upstream release the 5.4.2 version of the Linux Kernel? So instead, we use the "release number". I use this to indicate small changes to my package, as we'll see shortly.
+
+`pkgdesc` is just a text field that describes what this package does.
+
+`depends` is where the magic happens - this is where you list all the packages your meta-package will contain. They are all installed as dependencies as the name implies. As previously mentioned, if you include packages here that your installation can't see, such as an AUR package that isn't installed in a hosted or local repo, you'll get errors trying to install it as unfulfilled dependencies. So again, this is why a self-hosted repo really is the way to go if you want to be able to put anything you want here.
+
+### Create A Custom Install Meta-Package
+One of the most common ways people use meta-packages is to create a base install with all their applications of choice. This allows you to replicate a desired minimal install without worrying about forgetting something. That's the next step. We know that the `base` meta-package is missing a few things: a kernel, the firmware, filesystem utilities, a text editor, etc. Let's make a meta-package to remedy that situation. Let's set up our project on our computer with our self-hosted repository by creating a folder for it and the PKGBUILD.
+```bash
+% mkdir ~/stoicaviator-base
+% cd ~/stoicaviator-base
+% touch PKGBUILD
+```
+The first thing I want to do is include `base`, because otherwise I have an unsupported install. I'll include the vanilla kernel (`linux`), the firmware (`linux-firmware`), utilities for the filesystems I use (`dosfstools` for VFAT, `e2fsprogs` for ext2/3/4, and `cifsutils` for samba shares), my text editor of choice (`vim`), and the man page utilities and data (`man-db`, `man-pages`, and `texinfo`). Since I use `systemd-networkd` and `systemd-boot` for my network and bootloader in the vast majority of cases, I don't need to include any networking utilities or a bootloader, but you could definitely add them as well. So here's the content of our complete `PKGBUILD` file:
+```
+# Maintainer: Stoic Aviatior <stoicaviator[at]gmail.com>
+pkgname=stoicaviator-base
+pkgver=1
+pkgrel=1
+pkgdesc='Minimal set of packages required for a Stoic Aviator base install.`
+url='https://github.com/stoicaviator'
+arch=('any')
+license=('GPL')
+depends=('base` `linux` `linux-firmware` `dosfstools` `e2fsprogs` `cifsutils` `vim` `man-db` `man-pages` `texinfo`)
+```
+Now we can build our package, and stick it in our hosted repository.
+```bash
+% makepkg -s
+% cp stoicaviator-base-1-1-any.pkg.tar.xz /srv/http/stoicaviator
+% repo-add /srv/http/stoicaviator/stoicaviator.db.tar /srv/http/stoicaviator/stoicaviator-base-1-1-any.pkg.tar.xz
+```
+
+### Use Our Custom Meta-Package
+We now have our meta-package available to any computer with access to our repo. So if we wanted to do a fresh install on a different computer, we would follow the Wiki install until we get to "Select Your Mirrors". After we've done that in our `/etc/pacman.d/mirrorselect` we just need to add our hosted repo to `/etc/pacman.conf` file:
+```
+[stoicaviator]
+SigLevel = Never
+Server = file://repo.stoicaviator.com/stoicaviator
+```
+Instead of pacstrapping `base`, and a kernel, and a text editor, etc, we can just pacstrap out custom meta-package and get everything in one:
+```bash
+# pacstrap /mnt stoicaviator-base
+```
+Once we continue with the setup, we already have all of our tools installed. This may not seem very exciting, but remember you can build packages from the AUR and put them in your custom repo, and then they are available in a meta-package, and suddenly this becomes a lot more powerful. Let's go ahead and update our meta-package to demonstrate this.
+
+### Modify our Custom Meta-Package
+Let's say we want to make a small change to our meta-package. Maybe I've decided I prefer `zsh` as a shell (which I do) and want to add it to my base package. How would I do that? I just add it in to the array, bump my `pkgrel` since it's a minor change, then build my pacakge again and re-add it to my hosted repo to update it. So my new PKGBUILD looks like this:
+```
+# Maintainer: Stoic Aviatior <stoicaviator[at]gmail.com>
+pkgname=stoicaviator-base
+pkgver=1
+pkgrel=2
+pkgdesc='Minimal set of packages required for a Stoic Aviator base install.`
+url='https://github.com/stoicaviator'
+arch=('any')
+license=('GPL')
+depends=('base` `linux` `linux-firmware` `dosfstools` `e2fsprogs` `cifsutils` `vim` `man-db` `man-pages` `texinfo` 'zsh`)
+```
+So let's build and add it to our repo:
+```bash
+% makepkg -s
+% cp stoicaviator-base-1-2-any.pkg.tar.xz /srv/http/stoicaviator
+% repo-add /srv/http/stoicaviator/stoicaviator.db.tar /srv/http/stoicaviator/stoicaviator-base-1-2-any.pkg.tar.xz
+```
+You'll notice repo-add tells you that your package has been updated to the new version. Now go to any computer we used this on, that has `stoicaviator-base` installed on it, and run `pacman -Syu`, and you'll notice that `zsh` gets installed and `stoicaviator-base` is updated from 1-1, to 1-2. With a simple system update, your meta-package has also updated.
+
+### Integrate AUR into Custom Meta-Package
+There are few things from the AUR that I always like to have installed. A few fonts: `nerd-fonts-complete`, `ttf-iosevka` and `ttf-ms-fonts`. A different kernel and the headers: `linux-ck`, `linux-ck-headers`. A few apps: `spotify-tui` and `6cord`. Maybe a game too: `2048-rs`.
+
+The first step is to add this to our hosted repo. If you still haven't checked the [Recommendations](#recommendations) section to see what I have to say about `aurutils`, perhaps showing you how powerful it is now to add all of these packages to our repo with practically no effort will convince you to go check it out. First we install `aurutils` since we built it earlier but never installed it:
+```bash
+% pacman -S aurutils
+```
+Now we can just use `aur sync` to install our packages. The one snag here is that we have two local repos defined currently on our host. I would personally remove the `localrepo` and keep only the reference to our hosted repo `stoicaviator`. You could specify which database to use by passing `-d stoicaviator` to `aur sync`, but I'm just going to assume you've removed `localrepo` since there is no point having 2 of them. I'm also going to build in a clean chroot, which you've probably heard being mentioned, by passing the `-c` option. I also don't want to keep build and make dependencies installed by `makepkg` when `aurutils` calls it, so I'll also pass the `-r` option. This is how it works:
+```bash
+% aur sync -rc nerd-fonts-complete ttf-iosevka ttf-ms-fonts linux-ck linux-ck-headers spotify-tui 6cord 2048-rs
+```
+All your packages were built, in a clean chroot even, copied to your repo's directory and added to your repo's database. The only problem with this method is that your package files are owned by you and your group, not you and the http group, which means your server won't be able to send them to clients that want them as it won't have permission. If you're read my recommendations, you know how to fix this permanently so you never have to worry about it. For now, let's just change the ownership.
+```bash
+% sudo chown $USER:http /srv/http/stoicaviator/*.pkg.tar.gz
+```
+It's also worth noting that instead of worrying about updates to your packages from the AUR, you can also just run `aur sync -rcu` to update all the AUR pacakges in your custom repo too, and that means when you `pacman -Syu` on your clients, they will all download updated AUR packages too. It cannot be easier to maintain. 
+
+Now we can edit our meta-package. Since this is a pretty big change, let's go ahead and bump our package version with this change (notice `pkgrel` is reset to 1 - we restart the numbering here with every new `pkgver`). We aslso can update our dependancy array (I'm also removing `linux` since I'm going to be using `linux-ck` instead). You'll also notice I've broken up my depends array to make it more readable now:
+```
+# Maintainer: Stoic Aviatior <stoicaviator[at]gmail.com>
+pkgname=stoicaviator-base
+pkgver=2
+pkgrel=1
+pkgdesc='Minimal set of packages required for a Stoic Aviator base install.`
+url='https://github.com/stoicaviator'
+arch=('any')
+license=('GPL')
+depends=(
+    ## Official Packages ##
+    'base` `linux-firmware` `dosfstools` `e2fsprogs` `cifsutils` `vim` `man-db` `man-pages` `texinfo` 'zsh'
+    
+    ## AUR Packages ##
+    
+    # Fonts
+    'nerd-fonts-complete' 'ttf-iosevka' 'ttf-ms-fonts'
+    
+    # Kernel-related
+    'linux-ck' 'linux-ck-headers'
+    
+    # Apps
+    'spotify-tui' '6cord'
+    
+    # Games
+    '2048-rs'
+    )
+```
+Now we build it and add it to our repo:
+```bash
+% makepkg -s
+% cp stoicaviator-base-2-1-any.pkg.tar.xz /srv/http/stoicaviator
+% repo-add /srv/http/stoicaviator/stoicaviator.db.tar /srv/http/stoicaviator/stoicaviator-base-2-1-any.pkg.tar.xz
+```
+Again, a simple `pacman -Syu` on all our clients, and they pull in everything, including our packages we built from the AUR. And this still works with a fresh install because, as I've attempted to make clear, the only reason pacman can't install "AUR packages" is because the AUR doesn't actually hold packages, but now that we've turned the ones we want into packages and put those package files in a database that pacman has access to, it treats them like any other package.
+
+
 ## Recommendations
+I have a small list of recommendations. These are just things I have found to be the most useful for me. I am by no means an authority on any subject related to Arch, so take them all with a grain of salt.
+
+### Use Aurutils
+The number one peice of advice I have is this: use `aurutils`. In truth, any AUR helper that uses a local repo would work, but of those `aurutils` has been around the longest and is the most well tested, and it's creator/maintainer, AladW, is a Trusted User by the Arch Dev Team. I would suggest building `aurutils` once, ideally in a clean chroot, and hosting it on your hosted repo. I personally wouldn't add it to my meta-packages because I only host packages from the AUR on my server with the hosted repo, even if they are only used on one machine. I just find it more convenient to keep it all in one place. I regularly go through my host repo and remove any packages from the repo database and delete the files that I no longer need, so having it all in one place helps.
+
+Perhaps the best reason to use AUR utils isn't even that you can automatically add packages from the AUR to your hosted repo upon building them with one command, but that it lets you keep all your AUR packages updated with a simple command. I'll leave a deep dive into the working of `aurutils` to the user, but suffice it to say that if you're using a hosted repo, you won't find an easier way to maintain things.
+
+The only snag is that packages added to your repo with `aurutils` will have the ownership set to $USER:USER, but we want the ownership to be $USER:http. There are several ways to tackle this problem, from setting lighttpd's user to $USER, to using FTP or another protocol that is less picky, to doing some strange mounting things... I for one just put a function in my `.bash` and `.zshrc` files that takes care of it for me. It looks like this:
+```bash
+function aursync {
+    aur sync -rc "$@"
+    sudo chown -R $USER:http /srv/http/stoicaviator/*.pkg.tar.xz
+}
+```
+This is not an elegant solution, but it works for me. So now instead of calling `aur sync`, I just call `aursync` and everything works. To install a new package from the aur, `aursync yay`, and to update all my packages in my hosted repo, `aursync -u`.
+
+### Host AUR Packages
+
+### Use Git
+
+### Consider Security
+
 ## Conclusions
+This may seem like we've done a lot of work, we have reduced our workload on adding new packages to a PKGBUILD edit, building and adding our meta-package to our repo, and maybe a single `aur sync` command away if it's a package from the AUR we want to add, from updating and maintaining our systems. This is far easier than any other way to build systems with a common base than any other, including git submodules or text files being parsed into `yay`.
+
+At this point, you should understand the difference between a package and a package snapshot, between groups, packages and meta-packages, how pacman works, how the AUR works, and how to create and maintain your own repositories. There's really no limit to what you can do with this. I, for example, have several inter-woven packages. I have a `stoicaviator-base` meta-package which includes all my base utilities and I pacstrap to new installs instead of `base`. I have a `stoicaviator-xorg` which depends on `stoicaviator-base` and pulls in everything needed to get X up and running. I've also got `stoicaviator-amd` and `stoicaviator-nvidia`, both of which include the preferred drivers and utilities for either AMD-based GPUs or nVidia-based GPUs. I use the `provides` functionality of the ABS in my PKGBUILD files for those two meta-pacakges to create a dependancy for `stoicaviator-gpu` which either one will satisfy. I then have `stoicaviator-bspwm` and `stoicaviator-plasma`, both of which depend on `stoicaviator-gpu` and provide everything I want for my bspwm or KDE plasma installs respectively.
+
+So my final demonstration of the power of meta-packages, is to show you my pacstrap command I use during an install to install a KDE plasma environment:
+```base
+# pacstrap /mnt stoicaviator-plasma
+```
+That's it. And so when I'm finished with my install and I reboot, I can get a list of all explicitely installed packages:
+```base
+% pacman -Qqte
+stoicaviator-plasma
+```
+That's it. I have a working install, with KDE, games (steam and DF), mpd, my graphics drivers, a web browser, a media-player, OBS, discord, etc all installed with a single app. And any changes I want to make I do by updating that package in my repo and just running `pacman -Syu` on my client.
+
+The flexibility and power of this method is without equal. Combined with a dot-file manager, and I need only backup a few select directories in my $HOME folder.
+
+I hope this has been useful and informative, and I hope you now have the confidence to host your own repo and maintain your own meta-packages.
+
 ## Bibliography
 
 - [Pacman Tips and Tricks](https://wiki.archlinux.org/index.php/Pacman/Tips_and_tricks)
