@@ -36,16 +36,16 @@ I've tried to be as generic as possible, but in the name of accuracy and to ease
     - [Hosted Repo Configuration](#hosted-repo-configuration)
     - [Hosted Repo Usage](#hosted-repo-usage)
 - [Meta-Packages](#meta-packages)
-  - [Meta-Package Template]
-  - [Create a Custom Install Meta-Package]
-  - [Use our Custom Meta-Package]
-  - [Modify our Custom Meta-Package]
-  - [Integrate AUR into our Custom Meta-Package]
+  - [Meta-Package Template](#meta-package-template)
+  - [Create a Custom Install Meta-Package](#create-a-custom-install-meta-package)
+  - [Use our Custom Meta-Package](#use-our-custom-meta-package)
+  - [Modify our Custom Meta-Package](#modify-our-custom-meta-package)
+  - [Integrate AUR into our Custom Meta-Package](#integrate-aur-into-custom-meta-package)
 - [Recommendations](#recommendations)
-  - [Use Aurutils]
-  - [Host AUR Packages]
-  - [Use Git]
-  - [Consider Security]
+  - [Use Aurutils](#use-aurutils)
+  - [Host AUR Packages](#host-aur-packages)
+  - [Use Git](#use-git)
+  - [Consider Security](#consider-security)
 - [Conclusions](#conclusions)
 - [Bibliography](#bibliography)
  
