@@ -1,9 +1,12 @@
 # A guide to using meta-packages with Arch Linux.
 
+## Disclaimer
+I am not an expert, nor am I an Arch Linux Dev or Trusted User. What follows is my best understanding based on the resources available. If you attempt anything described here on a live system without backups and lose your data, that's on you. Make backups and understand what commands do before you type them in.
+
 ## Introduction
 This guide is intended to give Arch Linux users who are new to the idea of meta-packages and self-hosted respositories (repos) the basics of maintaining their own packages and repos. This topic is immensely useful for anyone that has more than one computer and would like to sync package changes (not configuration changes) across them. The information is wholly available in the Arch wiki, but does not currently exist compiled in a single page. As I'm familiar with github formatting, the information was easier for me to compile here. It is my intention to port some (or all) of this over to the Arch Wiki.
 
-This guide has 6 main parts. Basics, Repositories, Meta-packages, Recommendations, Conclusions and Bibliography. Basics is laid out in an FAQ style ensuring a fundamental understanding of the components we are going to be working with. Repositories will talk about how to create two types of self-hosted repositories: as a directory on your local machine, as well as a simple repository hosted over your network using a simple webserver (though this could be substituted for any other protocol: samba, nfs, ftp, etc). Meta-packages descibes how to create simple meta-packages starting with a PKGBUILD template and ending with adding them to a self-hosted repository. Recommendations contains a few tips and tricks that I have found work best for me in maintaining my own self-hosted repositories with my own packages and meta-packages. Conclusions is just some closing remarks. Bibliography will link to all the information I sourced to compile this document.
+This guide has 6 main parts. Basics, Repositories, Meta-packages, Recommendations, Conclusions and Bibliography. Basics is laid out in an FAQ style ensuring a fundamental understanding of the components we are going to be working with. Repositories will talk about how to create two types of self-hosted repositories: as a directory on your local machine, as well as a simple repository hosted over your network using a simple webserver (though this could be substituted for any other protocol: samba, nfs, ftp, etc). Meta-packages descibes how to create simple meta-packages starting with a PKGBUILD template and ending with adding them to a self-hosted repository. Recommendations contains a few tips and tricks that I have found work best for me in maintaining my own self-hosted repositories with my own packages and meta-packages. Conclusions is just some closing remarks. Bibliography will link to all the wiki pages containing information I sourced to compile this document. Additional information may have been extracted from man pages.
 
 While this may seem complicated and like it's a lot of information, building your own meta-packages and hosting your own repository is actually very simple at its heart thanks to how Arch Linux works. Many people who struggle with installing Arch Linux are reminded that it's designed to be "user-centric, not user-friendly" and aims to simplify development, not be easy to use. Once you understand how to create your own packages and host your own repositories, you'll learn very quickly just how true those statements are.
 I hope you find this guide useful and the experience of creating your own packages and hosting your own repositories to be rewarding.
@@ -44,7 +47,7 @@ I've tried to be as generic as possible, but in the name of accuracy and to ease
 - [Recommendations](#recommendations)
   - [Use Aurutils](#use-aurutils)
   - [Host AUR Packages](#host-aur-packages)
-  - [Use Git](#use-git)
+  - [Use a Version Control System](#use-a-version-control-system)
   - [Consider Security](#consider-security)
 - [Conclusions](#conclusions)
 - [Bibliography](#bibliography)
@@ -404,10 +407,13 @@ function aursync {
 This is not an elegant solution, but it works for me. So now instead of calling `aur sync`, I just call `aursync` and everything works. To install a new package from the aur, `aursync yay`, and to update all my packages in my hosted repo, `aursync -u`.
 
 ### Host AUR Packages
+I no longer install AUR helpers and build packages from the AUR on my client machines if at all possible. I have `aurutils` on my computer which serves my hosted repo out, and when I need an AUR package, I build it there and serve it out via the repo. This helps me keep my client machines clean and gives me a central place to manage my packages. It also allows me to have those packages available to any other computer that may want them. "Build once" has basically become my motto - instead of building a package off the AUR multiple times on different machines, I build ti once and then they all get the update from the server. I find this really simplifies my workflow and helps me keep track of what I've been doing.
 
-### Use Git
+### Use a Version Control System
+If you aren't familiar with VCS, pick one and learn it. I use mainly git and host on github, but there are plenty of options for VCS software and for hosting locations. Hosting your applications on VCS makes it easy to try new things and to maintain central control of your applications, as well as the added security of knowing they are backed up to the cloud. Learning how to use a VCS will be immensely useful to you once you start to realize it's potential. For keeping copies of your PKGBUILDS it is invaluable.
 
 ### Consider Security
+Just because we've configured a simple webserver to share packages that can easily be extended to share them over the internet, doesn't mean you should automatically do that. This was a basic overview of the power of meta-packages and does not mean that best-practices have been implemented. I personally have my `aurutils`, repos and pacman setup to use package-signing. Both my databases and my packages are all signed and that is enforced within my network and on the machines I control. While this may not be necessary for you, it's worth considering. I've also hardened my webserver but haven't covered that here. Make sure you do your research and secure your computers and resources to the degree you feel is required.
 
 ## Conclusions
 This may seem like we've done a lot of work, we have reduced our workload on adding new packages to a PKGBUILD edit, building and adding our meta-package to our repo, and maybe a single `aur sync` command away if it's a package from the AUR we want to add, from updating and maintaining our systems. This is far easier than any other way to build systems with a common base than any other, including git submodules or text files being parsed into `yay`.
@@ -428,6 +434,17 @@ That's it. I have a working install, with KDE, games (steam and DF), mpd, driver
 I hope this has been useful and informative, and I hope you now have the confidence to host your own repo and maintain your own meta-packages.
 
 ## Bibliography
-
+- [Arch Build System](https://wiki.archlinux.org/index.php/Arch_Build_System)
+- [Arch Package Guidelines](https://wiki.archlinux.org/index.php/Arch_package_guidelines)
+- [Arch User Repository](https://wiki.archlinux.org/index.php/Arch_User_Repository)
+- [Building in a Clean Chroot](https://wiki.archlinux.org/index.php/DeveloperWiki:Building_in_a_clean_chroot)
+- [Creating Packages](https://wiki.archlinux.org/index.php/Creating_packages)
+- [General Recommendations](https://wiki.archlinux.org/index.php/General_recommendations)
+- [Git](https://wiki.archlinux.org/index.php/Git)
+- [Frequently Asked Questions](https://wiki.archlinux.org/index.php/Frequently_asked_questions)
+- [makepkg](https://wiki.archlinux.org/index.php/Makepkg)
+- [Pacman](https://wiki.archlinux.org/index.php/Pacman)
+- [Pacman/Package Signing](https://wiki.archlinux.org/index.php/Pacman/Package_signing)
 - [Pacman Tips and Tricks](https://wiki.archlinux.org/index.php/Pacman/Tips_and_tricks)
-  - [Custom Local Repository](https://wiki.archlinux.org/index.php/Pacman/Tips_and_tricks#Custom_local_repository)
+- [PKGBUILD](https://wiki.archlinux.org/index.php/PKGBUILD)
+- [System Maintenance](https://wiki.archlinux.org/index.php/System_maintenance)
