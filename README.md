@@ -416,16 +416,14 @@ At this point, you should understand the difference between a package and a pack
 
 So my final demonstration of the power of meta-packages, is to show you my pacstrap command I use during an install to install a KDE plasma environment:
 ```base
-# pacstrap /mnt stoicaviator-plasma
+# pacstrap -i /mnt stoicaviator-plasma
 ```
-That's it. And so when I'm finished with my install and I reboot, I can get a list of all explicitely installed packages:
+That's it (the `-i` makes it interactive so I can pisk which `stoicaviator-gpu` provider I want, among others). And so when I'm finished with my install and I reboot, I can get a list of all explicitely installed packages:
 ```base
 % pacman -Qqte
 stoicaviator-plasma
 ```
-That's it. I have a working install, with KDE, games (steam and DF), mpd, my graphics drivers, a web browser, a media-player, OBS, discord, etc all installed with a single app. And any changes I want to make I do by updating that package in my repo and just running `pacman -Syu` on my client.
-
-The flexibility and power of this method is without equal. Combined with a dot-file manager, and I need only backup a few select directories in my $HOME folder.
+That's it. I have a working install, with KDE, games (steam and DF), mpd, drivers, libraries, programming languages and interpreters, a web browser, a media-player, OBS, discord, text editor, file utilities, shell, kernel, etc all installed with a single app. And any changes I want to make I do by updating that package in my repo and just running `pacman -Syu` on my client. The flexibility and power of this method is without equal. Combined with a dot-file manager, and I need only backup a few select directories in my $HOME folder.
 
 I hope this has been useful and informative, and I hope you now have the confidence to host your own repo and maintain your own meta-packages.
 
