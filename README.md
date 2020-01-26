@@ -305,7 +305,7 @@ We now have our meta-package available to any computer with access to our repo. 
 ```
 [stoicaviator]
 SigLevel = Never
-Server = file://repo.stoicaviator.com/stoicaviator
+Server = http://repo.stoicaviator.com/stoicaviator
 ```
 Instead of pacstrapping `base`, and a kernel, and a text editor, etc, we can just pacstrap out custom meta-package and get everything in one:
 ```bash
