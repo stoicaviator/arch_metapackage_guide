@@ -170,7 +170,7 @@ So the first thing we will do is create a directory to hold our empty repo. You 
 That's it. That's all it takes to create a repo. I know I've written a lot already, but it really is that simple. 2 commands and you are the proud owner of your own repo. It may be empty and pacman might not know anything about it, but that'll change soon enough.
 
 #### Local Repo Configuration
-Now we need to tell pacman how to find our repo and what settings we want to use. This is very simple: we define a new repo block in `/etc/pacman.conf`, we set up our package signing options, and then we give it a link to our directory containing our database and, eventually, all our package files. The server location requires a protocol too. We're used to seeing `http://` or `https://`, but there are many options, like `ftp://`. In this case, it's just a local file, so we'll use `file://` followed by the full path to our directory containing our repo. So lets append the following lines to the end of `/etc/pacman.conf`:
+Now we need to tell pacman how to find our repo and what settings we want to use. This is very simple: we define a new repo block in `/etc/pacman.conf`, we set up our package signing options, and then we give it a link to our directory containing our database and, eventually, all our package files. The server location requires a protocol too. We're used to seeing `http://` or `https://`, but there are many options, like `ftp://`. In this case, it's just a local file, so we'll use `file:///` followed by the full path to our directory containing our repo. So lets append the following lines to the end of `/etc/pacman.conf`:
 ```bash
 [localrepo]
 SigLevel = Never
