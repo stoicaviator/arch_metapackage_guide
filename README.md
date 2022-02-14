@@ -106,7 +106,7 @@ In theory, what I call a "hosted repo" is incorrect. I don't mean we want to hav
 In this section we will set up and learn how to use our own repositories. This is where the power of not just the ABS, but the modular design of pacman itself really shines. Once you realize how simple it is to create a local repo and host your AUR packages there, you'll realize the abstraction of the more advanced AUR helpers didn't actually save you all that much.
 
 ### Manually Build an AUR Package
-We're going to need a package to put in our repo once we get it setup, and with the popularity of pacman wrapper AUR helpers (from the now-defunct `yaourt` and `pacaur` to the current reigning champs `yay` and `trizen`), I thought it would be a good idea to review how to manually build and install an AUR package. I'm going to use `aurutils`, since I am going to be recommending it later anyway. Building a package from the AUR manually is a 5 step process:
+We're going to need a package to put in our repo once we get it setup, and with the popularity of pacman wrapper AUR helpers (from the now-defunct `yaourt` and `pacaur` to the current reigning champs `yay` and `paru`), I thought it would be a good idea to review how to manually build and install an AUR package. I'm going to use `aurutils`, since I am going to be recommending it later anyway. Building a package from the AUR manually is a 5 step process:
 
 1. Find the application you want and the snapshot URL
 2. Download the snapshot
@@ -287,11 +287,11 @@ The first thing I want to do is include `base`, because otherwise I have an unsu
 pkgname=stoicaviator-base
 pkgver=1
 pkgrel=1
-pkgdesc='Minimal set of packages required for a Stoic Aviator base install.`
+pkgdesc='Minimal set of packages required for a Stoic Aviator base install.'
 url='https://github.com/stoicaviator'
 arch=('any')
 license=('GPL')
-depends=('base` `linux` `linux-firmware` `dosfstools` `e2fsprogs` `cifsutils` `vim` `man-db` `man-pages` `texinfo`)
+depends=('base' 'linux' 'linux-firmware' 'dosfstools' 'e2fsprogs' 'cifsutils' 'vim' 'man-db' 'man-pages' 'texinfo')
 ```
 Now we can build our package, and stick it in our hosted repository.
 ```bash
@@ -320,11 +320,11 @@ Let's say we want to make a small change to our meta-package. Maybe I've decided
 pkgname=stoicaviator-base
 pkgver=1
 pkgrel=2
-pkgdesc='Minimal set of packages required for a Stoic Aviator base install.`
+pkgdesc='Minimal set of packages required for a Stoic Aviator base install.'
 url='https://github.com/stoicaviator'
 arch=('any')
 license=('GPL')
-depends=('base` `linux` `linux-firmware` `dosfstools` `e2fsprogs` `cifsutils` `vim` `man-db` `man-pages` `texinfo` 'zsh`)
+depends=('base' 'linux' 'linux-firmware' 'dosfstools' 'e2fsprogs' 'cifsutils' 'vim' 'man-db' 'man-pages' 'texinfo' 'zsh')
 ```
 So let's build and add it to our repo:
 ```bash
@@ -357,13 +357,13 @@ Now we can edit our meta-package. Since this is a pretty big change, let's go ah
 pkgname=stoicaviator-base
 pkgver=2
 pkgrel=1
-pkgdesc='Minimal set of packages required for a Stoic Aviator base install.`
+pkgdesc='Minimal set of packages required for a Stoic Aviator base install.'
 url='https://github.com/stoicaviator'
 arch=('any')
 license=('GPL')
 depends=(
     ## Official Packages ##
-    'base` `linux-firmware` `dosfstools` `e2fsprogs` `cifsutils` `vim` `man-db` `man-pages` `texinfo` 'zsh'
+    'base' 'linux-firmware' 'dosfstools' 'e2fsprogs' 'cifsutils' 'vim' 'man-db' 'man-pages' 'texinfo' 'zsh'
     
     ## AUR Packages ##
     
